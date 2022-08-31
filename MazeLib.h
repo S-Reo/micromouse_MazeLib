@@ -82,6 +82,7 @@ void printAllNode(maze_node *mn);//外堀だけprintfせず、そのまま描画
 
 //ノードの更新
 void updateNodeThree(maze_node *maze, wall_state *wall, uint8_t x, uint8_t y);
+void updateNodeDraw(maze_node *maze, uint8_t x, uint8_t y);
 /* ----- 迷路データ管理 ここまで----- */
 //     //座標を指定して、4方向の有無を書き込む
 // //壁の有無を更新、drawとフラグを更新

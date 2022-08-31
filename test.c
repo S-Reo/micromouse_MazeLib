@@ -5,7 +5,7 @@
 
 #include "MazeLib.h"
 
-#define DEBUG_ON    1
+#define DEBUG_ON    0
 #define SIMULATION  1
 
 #if SIMULATION
@@ -72,7 +72,6 @@ void Search()
 
             //シミュレータではアニメーションをとりあえず置いておき、最短経路がどうなるかとかを確認する
             //2. 方角、座標の更新
-                //printf("ここっぽい\r\n");
                 shiftState(&Mouse);
                 printf("4\r\n");
             //2. 壁の更新
@@ -98,9 +97,14 @@ void Search()
                 #if DEBUG_ON
                     printf("壁の状態2 %d, %d, %d, %d\r\n", wall[0], wall[1], wall[2], wall[3]);
                 #endif
-            
-            //2. 現在壁情報を、Mazeに反映
-            updateNodeThree(&my_maze, &wall[0], Mouse.now.pos.x, Mouse.now.pos.y);
+                //2. 現在壁情報を、Mazeに反映
+                updateNodeThree(&my_maze, &wall[0], Mouse.now.pos.x, Mouse.now.pos.y);
+            #if SIMULATION 
+                    //機体から出力するためにデータをセットする処理を呼ぶ
+                    //flagじゃなくて、drawに入れる
+                    updateNodeDraw(&my_maze, Mouse.now.pos.x, Mouse.now.pos.y);
+            #endif
+
             #if DEBUG_ON
                 printf("壁の状態3 %d, %d, %d, %d\r\n", wall[0], wall[1], wall[2], wall[3]);
             #endif
@@ -322,7 +326,7 @@ void Search()
 
     #if SIMULATION 
         //出来上がった迷路を出力する
-        printf("a\r\n");
+        printf("得られた迷路\r\n");
         printAllNode(&(my_maze));
         printf("9\r\n");
         printMatrix16ValueFromNode(&(my_maze)); //自分の迷路を更新していなかった

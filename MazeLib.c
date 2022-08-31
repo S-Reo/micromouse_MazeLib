@@ -204,6 +204,8 @@ _Bool getWallNow(state *st, wall_state *wall_st)//wall_existence *wall[4])(
     return true;
 
 }
+
+
 //壁があれば重みはデフォルト値を代入する
 //壁がなければそのままにしておく 前左右の情報の方角に合わせた変換は別のところで
 void updateNodeThree(maze_node *maze, wall_state *wall, uint8_t x, uint8_t y)
@@ -225,6 +227,17 @@ void updateNodeThree(maze_node *maze, wall_state *wall, uint8_t x, uint8_t y)
     maze->RawNode[x][y].weight = (maze->RawNode[x][y].weight == WALL) ? MAX_WEIGHT : maze->RawNode[x][y].weight;                   //南
     maze->ColumnNode[x][y].weight = (maze->ColumnNode[x][y].weight == WALL) ? MAX_WEIGHT : maze->ColumnNode[x][y].weight;          //西
 }
+//TeraTermに出力するのに使うデータを格納する
+    //16値を求めるには、各ノードに01が入っていればいい.入れるタイミングと判別方法は？
+    //👆の処理の後は、壁が01のどちらかしかない。ので、そのまま代入する
+void updateNodeDraw(maze_node *maze, uint8_t x, uint8_t y)
+{
+    maze->RawNode[x][y+1].draw = maze->RawNode[x][y+1].existence;
+    maze->ColumnNode[x+1][y].draw = maze->ColumnNode[x+1][y].existence;
+    maze->RawNode[x][y].draw = maze->RawNode[x][y].existence;
+    maze->RawNode[x][y].draw = maze->ColumnNode[x][y].existence;
+}
+
 //柱も使って壁の先取りをする
     //柱の周りのノードのうち3つに壁がなければ、残り一個を壁有にする
 

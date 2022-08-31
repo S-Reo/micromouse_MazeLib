@@ -1,5 +1,7 @@
 /* MATLABでゲットした壁データを、c言語で読み取る*/
 /* 走行後にMATLABに迷路を表示してもらうための変換処理*/
+/* 変換はここでまとめて書いたほうがいい */
+// MazeLibとMazeSimulationのインターフェース
 #include <stdio.h>
 #include<stdint-gcc.h>
 //一辺の区画数
