@@ -31,14 +31,16 @@
 //ゴール座標は自分で設定する
 //読み込むときは、サイズを自分で設定しない。データから求める。
 
-#define NUMBER_OF_SQUARES_X 32
-#define NUMBER_OF_SQUARES_Y 32
+#define NUMBER_OF_SQUARES_X 16
+#define NUMBER_OF_SQUARES_Y 16
 
-#define GOAL_SIZE_X 3
-#define GOAL_SIZE_Y 3
+#define GOAL_SIZE_X 2
+#define GOAL_SIZE_Y 2
 
-#define GOAL_X 16
-#define GOAL_Y 16
+#define GOAL_X 6
+#define GOAL_Y 9
+
+#define __JUDGE_GOAL__(x,y) ( (GOAL_X <= x) && (x < GOAL_X + GOAL_SIZE_X)) && ((GOAL_Y <= y) && (y < GOAL_Y + GOAL_SIZE_Y) )
 
 #define MAX_WEIGHT 4095
 typedef enum{
@@ -167,6 +169,9 @@ void updateNodeThree(maze_node *maze, state *st, uint8_t x, uint8_t y);
 void updateNodeDraw(maze_node *maze, uint8_t x, uint8_t y);
 
 _Bool getWallNow(state *st, wall_state *wall_st);
+
+void printAllWeight(maze_node *maze);
+_Bool outputDataToFile(maze_node *maze);
 
 void initProfile(profile *prof);
 void shiftState(profile *prof);

@@ -14,6 +14,8 @@
 
 //モード切替 : シミュレーションの関数を埋め込み、コメントアウト切り替えで実機の処理と入れ替え可能にする。（実機にSimulationライブラリを入れたくないため）
 #define LEFTHAND_SEARCH 1
+#define RIGHTHAND_SEARCH 0
+#define ADACHI_SEARCH   0
 
 simulation test;
 
@@ -27,6 +29,7 @@ void Search()
         printMatrix16ValueFromNode(&my_maze);
         printf("%ld\r\n",sizeof(my_maze));
         printAllNode(&my_maze);
+        printAllWeight(&my_maze);
     printf("1\r\n");
     //状態の初期化
     profile Mouse;
@@ -50,11 +53,11 @@ void Search()
         //物理データはどうするかROSで通信したらいいかも?とりあえず保留
 
         //既に書いたやつ使う
-        //1. 壁の更新タイミングが来るまで待機
-        //2. 来たら、方角とか向きとか現在座標とか更新してから、壁を更新
-        //3. 迷路の計算
-        //3. 次の座標と方角をセット
-        //3. コマンドを発行
+        //1. 壁の更新タイミングが来るまで待機 
+        //2. 来たら、方角とか向きとか現在座標とか更新してから、壁を更新 : 完了
+        //3. 迷路の計算 : 重み
+        //3. 次の座標と方角をセット : 進行方向の決定
+        //3. コマンドを発行         : 同じコマンドで実機とシミュレーション両方. シミュレーション側は、まとめてログとしておき、後で見やすく表示する
         //4. プラスアルファの計算して、1に戻る
         //5. 探索が終わったら、フラッシュ、合図、迷路の出力、デバッグデータなど。
         printProfile(&Mouse);
@@ -110,7 +113,7 @@ void Search()
             #if DEBUG_ON
                 printf("壁の状態3 %d, %d, %d, %d\r\n", wall[0], wall[1], wall[2], wall[3]);
             #endif
-            //ここから肝心のアルゴリズム
+            //ここから肝心のアルゴリズム : 進行方向の決定
             #if LEFTHAND_SEARCH
                 //単純な左手法
                 #if DEBUG_ON
@@ -200,8 +203,10 @@ void Search()
                     }
                 }
                 setNextPosition(&(Mouse.next));
+            #endif
+            
+            #if RIGHTHAND_SEARCH
 
-            #elif RIGHTHAND_SEARCH
                 if(wall[right] == NOWALL)
                 {
                     //現在の方角に合わせてxyを更新する
@@ -286,7 +291,11 @@ void Search()
                     }
                 }
                 setNextPosition(&(Mouse.next));
-            #elif ADACHI_SEARCH
+            #endif
+
+            #if ADACHI_SEARCH
+
+                printf("足立法\r\n");
                 //最短経路を求めながら走る
                 //求め方にも流派がある.
                 //全ノードの重みの計算
@@ -294,10 +303,21 @@ void Search()
                 //次のノードを決定
                 //最大3つのノードを比較。行けるところがなければUターン
 
-                //現ノードと次ノードの情報から、
-            #elif DEPTH_SEARCH
+                //現ノードと次ノードの情報から、進行方向を決定
+
+                //コマンドの発行まで
+            
+            #endif
+
+
+            #if DEPTH_SEARCH
+
                 //深さ優先探索
-            #elif WIDTH_SEARCH
+                printf("深さ優先探索");
+
+            #endif
+
+            #if WIDTH_SEARCH
                 //幅優先探索 
             #endif
         #if DEBUG_ON
@@ -305,7 +325,14 @@ void Search()
             
         #endif
         #if SIMULATION
-            printProfile(&Mouse);
+            //printProfile(&Mouse);
+            //ここでシミュレーションしたデータの可視化のためのデータを保存
+
+            //どの座標、どの方角か、壁はどうだったか. 次に目標とした座標と、重みはどうか。
+
+            //どんなコマンドを発行したか。速度と角速度、角度と位置（小数点あり）: コマンドの中でやる
+
+            //
         #endif
         //途中でアニメーション用の軌跡ログの関数を入れておく
         
@@ -333,8 +360,10 @@ void Search()
         //出来上がった迷路を出力する
         printf("得られた迷路\r\n");
         printAllNode(&(my_maze));
+        printAllWeight(&(my_maze));
         //printf("9\r\n");
         printMatrix16ValueFromNode(&(my_maze)); //自分の迷路を更新していなかった
+        outputDataToFile(&my_maze);
         //printf("10\r\n");
     #else 
         //実環境走行 : //最初の61.5mmの加速コマンドを発行
@@ -380,7 +409,8 @@ _Bool Simulation()
         printf("仮想迷路の");
         printMatrix16ValueFromNode(&(test.virtual_maze));
     #endif
-
+    printf("仮想迷路の");
+    printAllWeight(&(test.virtual_maze));
     /* ここでアルゴリズムを試し書きする */
     printf("探索関数\r\n");
     Search();
@@ -393,6 +423,7 @@ int main()
     if(Simulation() == true)
     {
         printf("完了\r\n");
+
     }
     else
     {

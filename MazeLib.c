@@ -1,5 +1,4 @@
 #include "MazeLib.h"
-
 //外からアクセスする関数. xyに制限が必要
 _Bool setExistanceRawNode(maze_node *maze, uint8_t x, uint8_t y, wall_state et)
 {
@@ -52,6 +51,98 @@ _Bool setWeightColumnNode(maze_node *maze, uint8_t x, uint8_t y, uint16_t wt)
         maze->ColumnNode[x][y].weight = wt;  
         return true;
     }
+}
+//xyがゴールエリアでかつ重みが0かどうか判定 || 表示用
+_Bool judgeRawNodeGoal(maze_node *maze, uint8_t x, uint8_t y)
+{
+    //重みが0かどうか
+    if(maze->RawNode[x][y].weight == 0)
+    {
+        //ゴールノードであるかどうか:マクロ作った
+        
+        if ( __JUDGE_GOAL__ (x,y) || __JUDGE_GOAL__(x,y-1) )
+            return true;
+        
+        return false;
+    }
+    else
+    {
+        return false;
+    }
+}
+_Bool judgeColumnNodeGoal(maze_node *maze, uint8_t x, uint8_t y)
+{
+    //重みが0かどうか
+    if(maze->ColumnNode[x][y].weight == 0)
+    {
+        //ゴールノードであるかどうか:マクロ作った
+        
+        if ( __JUDGE_GOAL__ (x,y) || __JUDGE_GOAL__(x-1,y) )
+            return true;
+        
+        return false;
+    }
+    else
+    {
+        return false;
+    }
+}
+void printAllWeight(maze_node *maze)
+{
+    //見やすい形に成型して表示する
+    //全出力を3桁にそろえればよさそう
+    //重みが0かつゴールエリア内の座標なら赤色で出力 31;1m
+    //行から表示して、
+    //列を表示
+    //交互に
+    printf("全ノードの重み\r\n");
+
+    for(int y=NUMBER_OF_SQUARES_Y; y > 0; y--)
+    {
+        //行
+        printf("     ");
+        for(int x=0; x < NUMBER_OF_SQUARES_X; x++)
+        {
+            if(judgeRawNodeGoal(maze, x,y) == true)
+            {
+                printf(" \x1B[31;1m%3x\x1B[37;m ",maze->RawNode[x][y].weight);
+            }
+            else
+            {
+                printf(" %3x ",maze->RawNode[x][y].weight);
+            }
+            if(x < NUMBER_OF_SQUARES_X-1)
+                 printf("     ");
+        }
+        printf("\r\n");
+                
+        //列
+        for(int x=0; x < NUMBER_OF_SQUARES_X+1; x++)
+        {
+            if(judgeColumnNodeGoal(maze, x,y-1) == true)
+            {
+                printf(" \x1B[31;1m%3x\x1B[37;m ",maze->ColumnNode[x][y-1].weight);
+            }
+            else
+            {
+                printf(" %3x ",maze->ColumnNode[x][y-1].weight);
+            }
+            if(x < NUMBER_OF_SQUARES_X)
+                printf("     ");
+        }
+        printf("\r\n");
+    }
+    //y が0のときの行だけ表示
+    printf("     ");
+    for(int x=0; x < NUMBER_OF_SQUARES_X; x++)
+    {
+        printf(" %3x ",maze->RawNode[x][0].weight);
+        if(x < NUMBER_OF_SQUARES_X-1)
+                printf("     ");
+    }
+    printf("\r\n");
+    
+    
 }
 void initMaze(maze_node *maze)
 {
@@ -134,6 +225,66 @@ void printAllNode(maze_node *mn)
         printf("\r\n");
     }
     printf("\r\n");
+}
+_Bool outputDataToFile(maze_node *maze)
+{
+    char weight_file[] = "weight.txt";
+    FILE*fp;
+    fp = fopen(weight_file,"w");
+    if(fp == NULL) {
+		printf("%s file not open!\n", weight_file);
+		return false;
+	} else {
+		printf("%s file opened!\n", weight_file);
+	}
+    
+    for(int y=NUMBER_OF_SQUARES_Y; y > 0; y--)
+    {
+        //行
+        fprintf(fp,"     ");
+        for(int x=0; x < NUMBER_OF_SQUARES_X; x++)
+        {
+            if(judgeRawNodeGoal(maze, x,y) == true)
+            {
+                fprintf(fp," GGG ");
+            }
+            else
+            {
+                fprintf(fp," %3x ",maze->RawNode[x][y].weight);
+            }
+            if(x < NUMBER_OF_SQUARES_X-1)
+                fprintf(fp,"     ");
+        }
+        fprintf(fp,"\r\n");
+                
+        //列
+        for(int x=0; x < NUMBER_OF_SQUARES_X+1; x++)
+        {
+            if(judgeColumnNodeGoal(maze, x,y-1) == true)
+            {
+                fprintf(fp," GGG ");
+            }
+            else
+            {
+                fprintf(fp," %3x ",maze->ColumnNode[x][y-1].weight);
+            }
+            if(x < NUMBER_OF_SQUARES_X)
+                fprintf(fp,"     ");
+        }
+        fprintf(fp,"\r\n");
+    }
+    //y が0のときの行だけ表示
+    fprintf(fp,"     ");
+    for(int x=0; x < NUMBER_OF_SQUARES_X; x++)
+    {
+        fprintf(fp," %3x ",maze->RawNode[x][0].weight);
+        if(x < NUMBER_OF_SQUARES_X-1)
+                fprintf(fp,"     ");
+    }
+    fprintf(fp,"\r\n");
+    fclose(fp);
+    return true;
+
 }
 static uint8_t convertNodeTo16Value(maze_node *maze, int x, int y)
 {
@@ -222,10 +373,10 @@ void updateNodeThree(maze_node *maze, state *st, uint8_t x, uint8_t y)
     maze->RawNode[x][y].flag = true;        //南
     maze->ColumnNode[x][y].flag = true;     //西
 
-    maze->RawNode[x][y+1].weight = (maze->RawNode[x][y+1].weight == WALL) ? MAX_WEIGHT : maze->RawNode[x][y+1].weight;             //北
-    maze->ColumnNode[x+1][y].weight = (maze->ColumnNode[x+1][y].weight == WALL) ? MAX_WEIGHT : maze->ColumnNode[x+1][y].weight;    //東
-    maze->RawNode[x][y].weight = (maze->RawNode[x][y].weight == WALL) ? MAX_WEIGHT : maze->RawNode[x][y].weight;                   //南
-    maze->ColumnNode[x][y].weight = (maze->ColumnNode[x][y].weight == WALL) ? MAX_WEIGHT : maze->ColumnNode[x][y].weight;          //西
+    maze->RawNode[x][y+1].weight = (maze->RawNode[x][y+1].existence == WALL) ? MAX_WEIGHT : maze->RawNode[x][y+1].weight;             //北
+    maze->ColumnNode[x+1][y].weight = (maze->ColumnNode[x+1][y].existence == WALL) ? MAX_WEIGHT : maze->ColumnNode[x+1][y].weight;    //東
+    maze->RawNode[x][y].weight = (maze->RawNode[x][y].existence == WALL) ? MAX_WEIGHT : maze->RawNode[x][y].weight;                   //南
+    maze->ColumnNode[x][y].weight = (maze->ColumnNode[x][y].existence == WALL) ? MAX_WEIGHT : maze->ColumnNode[x][y].weight;          //西
 }
 //TeraTermに出力するのに使うデータを格納する
     //16値を求めるには、各ノードに01が入っていればいい.入れるタイミングと判別方法は？

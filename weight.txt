@@ -1,0 +1,33 @@
+      fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff 
+ fff         0         0       fff         0       fff         0         0       fff         0         0         0       fff         0         0         0       fff 
+        0         0       fff         0         0         0       fff         0         0       fff       fff         0         0       fff         0         0 
+ fff       fff       fff         0       fff       fff       fff         0       fff         0         0         0         0         0         0       fff       fff 
+        0         0         0       fff         0         0         0       fff         0         0         0         0       fff         0         0         0 
+ fff       fff       fff       fff         0       fff       fff         0       fff         0         0         0         0         0         0       fff       fff 
+        0         0         0         0         0         0       fff         0         0         0         0         0         0         0         0         0 
+ fff       fff       fff       fff       fff       fff       fff         0       fff         0         0         0         0         0         0       fff       fff 
+        0         0         0         0         0         0         0       fff         0         0         0         0         0         0         0         0 
+ fff       fff         0       fff         0         0       fff         0         0         0         0         0         0         0         0       fff       fff 
+        0       fff       fff         0       fff       fff       fff       fff       fff         0         0         0         0         0         0         0 
+ fff         0         0         0         0         0       GGG       GGG       GGG         0         0         0         0         0         0       fff       fff 
+        0         0       fff         0         0         0       GGG       GGG         0         0         0         0         0         0         0         0 
+ fff       fff         0         0         0         0       GGG       GGG       GGG         0         0         0         0         0         0       fff       fff 
+        0       fff         0         0         0         0       GGG       GGG         0         0         0         0         0         0         0         0 
+ fff       fff         0         0         0         0         0         0         0         0         0         0         0         0         0       fff       fff 
+        0         0       fff         0         0         0         0         0         0         0         0         0         0         0         0         0 
+ fff       fff         0         0         0         0         0         0         0         0         0         0         0         0         0         0       fff 
+        0       fff         0         0         0         0         0         0         0         0         0         0         0         0         0         0 
+ fff       fff         0         0         0         0         0         0         0         0         0         0         0         0         0       fff       fff 
+        0         0       fff         0         0         0         0         0         0         0         0         0         0         0         0         0 
+ fff       fff       fff         0         0         0         0         0         0         0         0         0         0         0         0       fff       fff 
+        0         0         0         0         0         0         0         0         0         0         0         0         0         0         0         0 
+ fff       fff       fff         0         0         0         0         0         0         0         0         0         0         0         0         0       fff 
+        0         0         0         0         0         0         0         0         0         0         0         0         0         0         0         0 
+ fff       fff       fff         0         0         0         0         0         0         0         0         0         0         0         0       fff       fff 
+        0         0         0         0         0         0         0         0         0         0         0         0         0         0         0         0 
+ fff       fff       fff         0         0         0         0         0         0         0         0         0         0         0       fff         0       fff 
+        0         0         0         0         0         0         0         0         0         0         0         0         0         0         0         0 
+ fff       fff       fff         0         0         0         0         0         0         0         0         0         0       fff         0       fff       fff 
+        0         0       fff       fff         0       fff       fff         0         0       fff       fff         0       fff         0       fff       fff 
+ fff       fff         0         0         0         0         0         0         0         0         0         0         0         0         0         0       fff 
+      fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff 
