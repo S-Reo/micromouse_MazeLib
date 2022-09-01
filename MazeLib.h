@@ -80,9 +80,7 @@ void printMatrix16ValueFromNode(maze_node *maze);
 void printSingleNode(maze_node *mn, uint8_t x, uint8_t y);
 void printAllNode(maze_node *mn);//外堀だけprintfせず、そのまま描画用データに。
 
-//ノードの更新
-void updateNodeThree(maze_node *maze, wall_state *wall, uint8_t x, uint8_t y);
-void updateNodeDraw(maze_node *maze, uint8_t x, uint8_t y);
+
 /* ----- 迷路データ管理 ここまで----- */
 //     //座標を指定して、4方向の有無を書き込む
 // //壁の有無を更新、drawとフラグを更新
@@ -164,6 +162,10 @@ void setPosition(position *pos,uint8_t x, uint8_t y);
 void setGoal(profile *prof, uint8_t x, uint8_t y);
 //void setWall(state *st, wall_state *w_st);
 void setWallExistence(wall_existence *existence, wall_state *state);
+//ノードの更新
+void updateNodeThree(maze_node *maze, state *st, uint8_t x, uint8_t y);
+void updateNodeDraw(maze_node *maze, uint8_t x, uint8_t y);
+
 _Bool getWallNow(state *st, wall_state *wall_st);
 
 void initProfile(profile *prof);

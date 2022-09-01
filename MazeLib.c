@@ -208,14 +208,14 @@ _Bool getWallNow(state *st, wall_state *wall_st)//wall_existence *wall[4])(
 
 //壁があれば重みはデフォルト値を代入する
 //壁がなければそのままにしておく 前左右の情報の方角に合わせた変換は別のところで
-void updateNodeThree(maze_node *maze, wall_state *wall, uint8_t x, uint8_t y)
+void updateNodeThree(maze_node *maze, state *st, uint8_t x, uint8_t y)
 {
     //壁の有無の更新。既知の壁には上書きしない。重みの更新は？既知かどうかは重複するから書かない
         //重みは？壁があればMAX値、なければそのまま   
-    maze->RawNode[x][y+1].existence = (maze->RawNode[x][y+1].existence == UNKNOWN) ? wall[0] : maze->RawNode[x][y+1].existence;             //北
-    maze->ColumnNode[x+1][y].existence = (maze->ColumnNode[x+1][y].existence == UNKNOWN) ? wall[1] : maze->ColumnNode[x+1][y].existence;    //東
-    maze->RawNode[x][y].existence = (maze->RawNode[x][y].existence == UNKNOWN) ? wall[2] : maze->RawNode[x][y].existence;                   //南
-    maze->ColumnNode[x][y].existence = (maze->ColumnNode[x][y].existence == UNKNOWN) ? wall[3] : maze->ColumnNode[x][y].existence;          //西
+    maze->RawNode[x][y+1].existence = (maze->RawNode[x][y+1].existence == UNKNOWN) ? st->wall.north : maze->RawNode[x][y+1].existence;             //北
+    maze->ColumnNode[x+1][y].existence = (maze->ColumnNode[x+1][y].existence == UNKNOWN) ? st->wall.east : maze->ColumnNode[x+1][y].existence;    //東
+    maze->RawNode[x][y].existence = (maze->RawNode[x][y].existence == UNKNOWN) ? st->wall.south : maze->RawNode[x][y].existence;                   //南
+    maze->ColumnNode[x][y].existence = (maze->ColumnNode[x][y].existence == UNKNOWN) ? st->wall.west : maze->ColumnNode[x][y].existence;          //西
 
     maze->RawNode[x][y+1].flag = true;      //北
     maze->ColumnNode[x+1][y].flag = true;   //東
@@ -232,10 +232,10 @@ void updateNodeThree(maze_node *maze, wall_state *wall, uint8_t x, uint8_t y)
     //👆の処理の後は、壁が01のどちらかしかない。ので、そのまま代入する
 void updateNodeDraw(maze_node *maze, uint8_t x, uint8_t y)
 {
-    maze->RawNode[x][y+1].draw = maze->RawNode[x][y+1].existence;
-    maze->ColumnNode[x+1][y].draw = maze->ColumnNode[x+1][y].existence;
-    maze->RawNode[x][y].draw = maze->RawNode[x][y].existence;
-    maze->RawNode[x][y].draw = maze->ColumnNode[x][y].existence;
+    maze->RawNode[x][y+1].draw = maze->RawNode[x][y+1].existence;       //北
+    maze->ColumnNode[x+1][y].draw = maze->ColumnNode[x+1][y].existence; //東
+    maze->RawNode[x][y].draw = maze->RawNode[x][y].existence;           //南
+    maze->ColumnNode[x][y].draw = maze->ColumnNode[x][y].existence;     //西
 }
 
 //柱も使って壁の先取りをする
@@ -413,6 +413,7 @@ void printProfile(profile *prof)
     printf("次\r\n");
     printState( &(prof->next) );
 
+    printf("\r\n");
     // printf("目標\r\n");
     // printState( &(prof->target) );
     

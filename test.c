@@ -23,9 +23,10 @@ void Search()
     printf("0\r\n");
     maze_node my_maze;
     initMaze(&my_maze);
-        //printMatrix16Value(&my_maze);
-        //printf("%ld\r\n",sizeof(my_maze));
-        //printAllNode(&Maze);
+        printf("自分の迷路の初期化の確認");
+        printMatrix16ValueFromNode(&my_maze);
+        printf("%ld\r\n",sizeof(my_maze));
+        printAllNode(&my_maze);
     printf("1\r\n");
     //状態の初期化
     profile Mouse;
@@ -40,7 +41,7 @@ void Search()
     #endif
 
     shiftState(&Mouse);
-    printf("3\r\n");
+    //printf("3\r\n");
         //test用の迷路を参照 test.virtual_maze
         //斜め走行シミュレーションのための位置取得はどうするか
             //MATLABはdouble型なので、位置を小数点付きで指定すればいい
@@ -73,7 +74,7 @@ void Search()
             //シミュレータではアニメーションをとりあえず置いておき、最短経路がどうなるかとかを確認する
             //2. 方角、座標の更新
                 shiftState(&Mouse);
-                printf("4\r\n");
+                //printf("4\r\n");
             //2. 壁の更新
                 //今向いている方向に応じて、前右左をとる（後ろはかならず無し.）かならず013前右左, 3後ろ. 値は01のどちらかしかない
                 wall_state wall[4]={0};
@@ -86,7 +87,8 @@ void Search()
                         printf("チェック: %d\r\n",convert16ValueToWallDirection_Simulation(&test, &(Mouse.now), &wall[0]));
                         printf("壁の状態1 %d, %d, %d, %d\r\n", wall[0], wall[1], wall[2], wall[3]);
                     #else
-                        printf("チェック: %d\r\n",convert16ValueToWallDirection_Simulation(&test, &(Mouse.now), &wall[0]));
+                        convert16ValueToWallDirection_Simulation(&test, &(Mouse.now), &wall[0]);
+                        
                     #endif
                 #else 
                     //実環境走行 : センサデータを持ってきて、閾値で判断したものをwallに代入
@@ -98,7 +100,7 @@ void Search()
                     printf("壁の状態2 %d, %d, %d, %d\r\n", wall[0], wall[1], wall[2], wall[3]);
                 #endif
                 //2. 現在壁情報を、Mazeに反映
-                updateNodeThree(&my_maze, &wall[0], Mouse.now.pos.x, Mouse.now.pos.y);
+                updateNodeThree(&my_maze, &(Mouse.now), Mouse.now.pos.x, Mouse.now.pos.y);
             #if SIMULATION 
                     //機体から出力するためにデータをセットする処理を呼ぶ
                     //flagじゃなくて、drawに入れる
@@ -300,6 +302,9 @@ void Search()
             #endif
         #if DEBUG_ON
             printf("8\r\n");
+            
+        #endif
+        #if SIMULATION
             printProfile(&Mouse);
         #endif
         //途中でアニメーション用の軌跡ログの関数を入れておく
@@ -328,9 +333,9 @@ void Search()
         //出来上がった迷路を出力する
         printf("得られた迷路\r\n");
         printAllNode(&(my_maze));
-        printf("9\r\n");
+        //printf("9\r\n");
         printMatrix16ValueFromNode(&(my_maze)); //自分の迷路を更新していなかった
-        printf("10\r\n");
+        //printf("10\r\n");
     #else 
         //実環境走行 : //最初の61.5mmの加速コマンドを発行
         //フラッシュ
@@ -352,7 +357,9 @@ _Bool Simulation()
     //MATLABもしくは実機走行により作った迷路テキストをインポート
     
     initMaze(&(test.virtual_maze));
+    #if DEBUG_ON
     printMatrix16ValueFromNode(&(test.virtual_maze));//OK
+    #endif
 
     if(getFileData(&test) == true) //OK
     {
@@ -367,9 +374,12 @@ _Bool Simulation()
     getNodeFrom16Value_Simulation(&test);
 
     //確認 : フォーマットOK
-    printAllNode(&(test.virtual_maze));
-    printMatrix16ValueFromNode(&(test.virtual_maze));
-
+    #if DEBUG_ON
+        printf("仮想迷路の");
+        printAllNode(&(test.virtual_maze));
+        printf("仮想迷路の");
+        printMatrix16ValueFromNode(&(test.virtual_maze));
+    #endif
 
     /* ここでアルゴリズムを試し書きする */
     printf("探索関数\r\n");
