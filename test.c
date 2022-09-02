@@ -19,25 +19,24 @@
 
 simulation test;
 
-void Search()
+void Search(maze_node *my_maze, profile *Mouse)
 {   
     //迷路の初期化
     printf("0\r\n");
-    maze_node my_maze;
-    initMaze(&my_maze);
-    initWeight(&my_maze);
+    
+    initMaze(my_maze);
+    initWeight(my_maze);
 
     printf("1\r\n");
     //状態の初期化
-    profile Mouse;
-    initProfile(&Mouse);
-    Mouse.now.node = &(my_maze.RawNode[0][0]);
-    Mouse.next.node = &(my_maze.RawNode[0][1]);
+    initProfile(Mouse, my_maze);
+    Mouse->now.node = &(my_maze->RawNode[0][0]);
+    Mouse->next.node = &(my_maze->RawNode[0][1]);
         printf("自分の迷路の初期化の確認");
-        printMatrix16ValueFromNode(&my_maze);
-        printf("%ld\r\n",sizeof(my_maze));
-        printAllNode(&my_maze);
-        printAllWeight(&my_maze, &(Mouse.now.pos));
+        printMatrix16ValueFromNode(my_maze);
+        printf("%ld\r\n",sizeof(*my_maze));
+        printAllNode(my_maze);
+        printAllWeight(my_maze, &(Mouse->now.pos));
         //printProfile(&Mouse);
     printf("2\r\n");
     //走らせる
@@ -65,17 +64,18 @@ void Search()
         //5. 探索が終わったら、フラッシュ、合図、迷路の出力、デバッグデータなど。
         
         //スタート座標にいる状態で、現在の重みを更新
-        updateAllNodeWeight(&my_maze, Mouse.goal_lesser.x, Mouse.goal_lesser.y, GOAL_SIZE_X, GOAL_SIZE_Y, 0x01);
-        printAllWeight(&my_maze, &(Mouse.now.pos));
-        printProfile(&Mouse);
-        printf("0,0の南ノードの重み（スタート）:%x\r\n",Mouse.now.node->weight);
-        printf("0,0から見た北のノードの重み（スタート）:%x\r\n",Mouse.next.node->weight);
-        while( ! ((Mouse.goal_lesser.x <= Mouse.now.pos.x && Mouse.now.pos.x <= Mouse.goal_larger.x) && (Mouse.goal_lesser.y <= Mouse.now.pos.y && Mouse.now.pos.y <= Mouse.goal_larger.y)) )
+        updateAllNodeWeight(my_maze, Mouse->goal_lesser.x, Mouse->goal_lesser.y, GOAL_SIZE_X, GOAL_SIZE_Y, 0x01);
+        printAllWeight(my_maze, &(Mouse->now.pos));
+        printProfile(Mouse);
+        printf("0,0の南ノードの重み（スタート）:%x\r\n",Mouse->now.node->weight);
+        printf("0,0から見た北のノードの重み（スタート）:%x\r\n",Mouse->next.node->weight);
+        int count=0;
+        while( ! ((Mouse->goal_lesser.x <= Mouse->next.pos.x && Mouse->next.pos.x <= Mouse->goal_larger.x) && (Mouse->goal_lesser.y <= Mouse->next.pos.y && Mouse->next.pos.y <= Mouse->goal_larger.y)) )
         {
-            //printf("%d, %d, %d, %d, %d, %d\r\n",Mouse.goal_lesser.x, Mouse.goal_lesser.y, Mouse.goal_larger.x, Mouse.goal_larger.y, Mouse.now.pos.x, Mouse.now.pos.y);
-            static int count=0;
+            //printf("%d, %d, %d, %d, %d, %d\r\n",Mouse->goal_lesser.x, Mouse->goal_lesser.y, Mouse->goal_larger.x, Mouse->goal_larger.y, Mouse->now.pos.x, Mouse->now.pos.y);
+            
             #if LEFTHAND_SEARCH || RIGHTHAND_SEARCH || ADACHI_SEARCH
-                if(Mouse.next.pos.x == 0 && Mouse.next.pos.y == 0)
+                if(Mouse->next.pos.x == 0 && Mouse->next.pos.y == 0)
                 {
                     printf("break; 一周にかかった歩数 : %d\r\n",count);
                     break;
@@ -87,10 +87,10 @@ void Search()
                 //壁の更新タイミングが来た後の処理
             //シミュレータではアニメーションをとりあえず置いておき、最短経路がどうなるかとかを確認する
             //2. 方角、座標の更新
-                shiftState(&Mouse);
+                shiftState(Mouse);
                 //新しいノードに入ったことになっている
-                printf("現在ノードの重み:%x\r\n",Mouse.now.node->weight);
-                printf("次のノードの重み:%x\r\n",Mouse.next.node->weight);//nowをネクストに入れたばかりなのでnow==next
+                printf("現在ノードの重み:%x\r\n",Mouse->now.node->weight);
+                printf("次のノードの重み:%x\r\n",Mouse->next.node->weight);//nowをネクストに入れたばかりなのでnow==next
                 //printf("4\r\n");
             //2. 壁の更新
                 //今向いている方向に応じて、前右左をとる（後ろはかならず無し.）かならず013前右左, 3後ろ. 値は01のどちらかしかない
@@ -101,10 +101,10 @@ void Search()
                     
                     #if DEBUG_ON
                         printf("壁の状態0 %d, %d, %d, %d\r\n", wall[0], wall[1], wall[2], wall[3]);
-                        printf("チェック: %d\r\n",convert16ValueToWallDirection_Simulation(&test, &(Mouse.now), &wall[0]));
+                        printf("チェック: %d\r\n",convert16ValueToWallDirection_Simulation(&test, &(Mouse->now), &wall[0]));
                         printf("壁の状態1 %d, %d, %d, %d\r\n", wall[0], wall[1], wall[2], wall[3]);
                     #else
-                        convert16ValueToWallDirection_Simulation(&test, &(Mouse.now), &wall[0]);
+                        convert16ValueToWallDirection_Simulation(&test, &(Mouse->now), &wall[0]);
                         
                     #endif
                 #else 
@@ -112,16 +112,16 @@ void Search()
                     //Photo[]を得るためのWallDetectライブラリを使う
                 #endif
                 //前右左の情報を配列に入れて持ってくる
-                getWallNow(&(Mouse.now), &wall[0]);    //前後左右のデータを自分の現在壁情報に反映
+                getWallNow(&(Mouse->now), &wall[0]);    //前後左右のデータを自分の現在壁情報に反映
                 #if DEBUG_ON
                     printf("壁の状態2 %d, %d, %d, %d\r\n", wall[0], wall[1], wall[2], wall[3]);
                 #endif
                 //2. 現在壁情報を、Mazeに反映
-                updateNodeThree(&my_maze, &(Mouse.now), Mouse.now.pos.x, Mouse.now.pos.y);
+                updateNodeThree(my_maze, &(Mouse->now), Mouse->now.pos.x, Mouse->now.pos.y);
             #if SIMULATION 
                     //機体から出力するためにデータをセットする処理を呼ぶ
                     //flagじゃなくて、drawに入れる
-                    //updateNodeDraw(&my_maze, Mouse.now.pos.x, Mouse.now.pos.y);
+                    //updateNodeDraw(my_maze, Mouse->now.pos.x, Mouse->now.pos.y);
             #endif
 
             #if DEBUG_ON
@@ -137,19 +137,19 @@ void Search()
                 if(wall[left] == NOWALL)
                 {
                     //現在の方角に合わせてxyを更新する
-                    switch (Mouse.now.car)
+                    switch (Mouse->now.car)
                     {
                     case north:
-                        Mouse.next.car = west;
+                        Mouse->next.car = west;
                         break;
                     case east:
-                        Mouse.next.car = north;
+                        Mouse->next.car = north;
                         break;
                     case south:
-                        Mouse.next.car = east;
+                        Mouse->next.car = east;
                         break;
                     case west:
-                        Mouse.next.car = south;
+                        Mouse->next.car = south;
                         break;
                     default:
                         break;
@@ -157,19 +157,19 @@ void Search()
                 }
                 else if(wall[front] == NOWALL)
                 {
-                    switch (Mouse.now.car)
+                    switch (Mouse->now.car)
                     {
                     case north:
-                        Mouse.next.car = north;
+                        Mouse->next.car = north;
                         break;
                     case east:
-                        Mouse.next.car = east;
+                        Mouse->next.car = east;
                         break;
                     case south:
-                        Mouse.next.car = south;
+                        Mouse->next.car = south;
                         break;
                     case west:
-                        Mouse.next.car = west;
+                        Mouse->next.car = west;
                         break;
                     default:
                         break;
@@ -177,19 +177,19 @@ void Search()
                 }
                 else if(wall[right] == NOWALL)
                 {
-                    switch (Mouse.now.car)
+                    switch (Mouse->now.car)
                     {
                     case north:
-                        Mouse.next.car = east;
+                        Mouse->next.car = east;
                         break;
                     case east:
-                        Mouse.next.car = south;
+                        Mouse->next.car = south;
                         break;
                     case south:
-                        Mouse.next.car = west;
+                        Mouse->next.car = west;
                         break;
                     case west:
-                        Mouse.next.car = north;
+                        Mouse->next.car = north;
                         break;
                     default:
                         break;
@@ -198,25 +198,25 @@ void Search()
                 else //back
                 {
                     //Uターン
-                    switch (Mouse.now.car)
+                    switch (Mouse->now.car)
                     {
                     case north:
-                        Mouse.next.car = south;
+                        Mouse->next.car = south;
                         break;
                     case east:
-                        Mouse.next.car = west;
+                        Mouse->next.car = west;
                         break;
                     case south:
-                        Mouse.next.car = north;
+                        Mouse->next.car = north;
                         break;
                     case west:
-                        Mouse.next.car = east;
+                        Mouse->next.car = east;
                         break;
                     default:
                         break;
                     }
                 }
-                setNextPosition(&(Mouse.next));
+                setNextPosition(&(Mouse->next));
             #endif
             
             #if RIGHTHAND_SEARCH
@@ -224,19 +224,19 @@ void Search()
                 if(wall[right] == NOWALL)
                 {
                     //現在の方角に合わせてxyを更新する
-                    switch (Mouse.now.car)
+                    switch (Mouse->now.car)
                     {
                     case north:
-                        Mouse.next.car = east;
+                        Mouse->next.car = east;
                         break;
                     case east:
-                        Mouse.next.car = south;
+                        Mouse->next.car = south;
                         break;
                     case south:
-                        Mouse.next.car = west;
+                        Mouse->next.car = west;
                         break;
                     case west:
-                        Mouse.next.car = north;
+                        Mouse->next.car = north;
                         break;
                     default:
                         break;
@@ -244,19 +244,19 @@ void Search()
                 }
                 else if(wall[front] == NOWALL)
                 {
-                    switch (Mouse.now.car)
+                    switch (Mouse->now.car)
                     {
                     case north:
-                        Mouse.next.car = north;
+                        Mouse->next.car = north;
                         break;
                     case east:
-                        Mouse.next.car = east;
+                        Mouse->next.car = east;
                         break;
                     case south:
-                        Mouse.next.car = south;
+                        Mouse->next.car = south;
                         break;
                     case west:
-                        Mouse.next.car = west;
+                        Mouse->next.car = west;
                         break;
                     default:
                         break;
@@ -264,19 +264,19 @@ void Search()
                 }
                 else if(wall[left] == NOWALL)
                 {
-                    switch (Mouse.now.car)
+                    switch (Mouse->now.car)
                     {
                     case north:
-                        Mouse.next.car = west;
+                        Mouse->next.car = west;
                         break;
                     case east:
-                        Mouse.next.car = north;
+                        Mouse->next.car = north;
                         break;
                     case south:
-                        Mouse.next.car = east;
+                        Mouse->next.car = east;
                         break;
                     case west:
-                        Mouse.next.car = south;
+                        Mouse->next.car = south;
                         break;
                     default:
                         break;
@@ -286,25 +286,25 @@ void Search()
                 else //back
                 {
                     //Uターン
-                    switch (Mouse.now.car)
+                    switch (Mouse->now.car)
                     {
                     case north:
-                        Mouse.next.car = south;
+                        Mouse->next.car = south;
                         break;
                     case east:
-                        Mouse.next.car = west;
+                        Mouse->next.car = west;
                         break;
                     case south:
-                        Mouse.next.car = north;
+                        Mouse->next.car = north;
                         break;
                     case west:
-                        Mouse.next.car = east;
+                        Mouse->next.car = east;
                         break;
                     default:
                         break;
                     }
                 }
-                setNextPosition(&(Mouse.next));
+                setNextPosition(&(Mouse->next));
             #endif
 
             #if ADACHI_SEARCH
@@ -312,32 +312,21 @@ void Search()
                 //最短経路を求めながら走る
                 //求め方にも流派がある.
                 //全ノードの重みの計算
-                updateAllNodeWeight(&my_maze, Mouse.goal_lesser.x, Mouse.goal_lesser.y, GOAL_SIZE_X, GOAL_SIZE_Y, 0x01);
-        //自分のノードの重みがおかしい. 参照先は自分の迷路データmy_mazeのrawcolumnのはず
-        //printAllWeight(&my_maze, &(Mouse.now.pos));
-        Mouse.now.node = getNodeInfo(&my_maze,Mouse.now.pos.x,Mouse.now.pos.y, Mouse.now.car);
+                updateAllNodeWeight(my_maze, Mouse->goal_lesser.x, Mouse->goal_lesser.y, GOAL_SIZE_X, GOAL_SIZE_Y, 0x01);
+        
+                Mouse->now.node = getNodeInfo(my_maze,Mouse->now.pos.x,Mouse->now.pos.y, Mouse->now.car);
 
-        printf("現在ノードの重み:%x, 侵入方角:%d, x:%d, y:%d, ノードのxy:%u, %u, rawなら0.columnなら1:%d\r\n",Mouse.now.node->weight, Mouse.now.car, Mouse.now.pos.x,Mouse.now.pos.y, Mouse.now.node->pos.x, Mouse.now.node->pos.y, Mouse.now.node->rc);
-                //updateAllNodeWeight(&my_maze, Mouse.goal_lesser.x, Mouse.goal_lesser.y, GOAL_SIZE_X, GOAL_SIZE_Y, 0x01);
-                Mouse.next.node = getNextNode(&my_maze,Mouse.now.car,Mouse.now.node,0x01);
-                getNextState(&(Mouse.now),&(Mouse.next), Mouse.next.node);
+                printf("現在ノードの重み:%x, 侵入方角:%d, x:%d, y:%d, ノードのxy:%u, %u, rawなら0.columnなら1:%d\r\n",Mouse->now.node->weight, Mouse->now.car, Mouse->now.pos.x,Mouse->now.pos.y, Mouse->now.node->pos.x, Mouse->now.node->pos.y, Mouse->now.node->rc);
+                //updateAllNodeWeight(my_maze, Mouse->goal_lesser.x, Mouse->goal_lesser.y, GOAL_SIZE_X, GOAL_SIZE_Y, 0x01);
+                Mouse->next.node = getNextNode(my_maze,Mouse->now.car,Mouse->now.node,0x01);
+                getNextState(&(Mouse->now),&(Mouse->next), Mouse->next.node);
 
-                // //自分のノードの重みがおかしい. 参照先は自分の迷路データmy_mazeのrawcolumnのはず
-                // Mouse.now.node = getNodeInfo(&my_maze,Mouse.now.pos.x,Mouse.now.pos.y, Mouse.now.car);
-                // printf("重み:%x\r\n",Mouse.now.node->weight);
-                // Mouse.next.node = getNextNode(&my_maze,Mouse.now.car,Mouse.now.node,0x01);//←でセグメンテーションフォルトが起きる
-                // //ノードではマップ上のノードのアドレスを見ているが、自分の状態を示すのには値を使用している
-                // getNextState(&(Mouse.now),&(Mouse.next), Mouse.next.node);
-                
-                
+                //ノードではマップ上のノードのアドレスを見ているが、自分の状態を示すのには値を使用している
                 //次のノードを決定
                 //最大3つのノードを比較。行けるところがなければUターン
                 //現在ノードから行けるノードのうち、もっとも重みが小さいノードのx,yを返す
-                
-                //Mouse.next.node = getNextNode(&my_maze, Mouse.now.car, Mouse.now.node, 0x01);//stateを返した方が、アクションにつなげやすいかも
-                //getNextState(&my_maze, &(Mouse.now), 0x01);
-                //ノードではマップ上のノードのアドレスを見ているが、自分の状態を示すのには値を使用している
                 //現ノードと次ノードの情報から、進行方向を決定
+
                 //斜めを考えるのはここ.
                 //細かい動作生成のための情報は抜きにして、4方角だけを考えると、方角と座標さえ更新できればいい.
                 //現在ノードから
@@ -359,7 +348,7 @@ void Search()
             #endif
         
         #if DEBUG_ON
-            printf("x,%u, y,%u\r\n",Mouse.goal_lesser.x, Mouse.goal_lesser.y);
+            printf("x,%u, y,%u\r\n",Mouse->goal_lesser.x, Mouse->goal_lesser.y);
             
             printf("アップデート完了\r\n");
             printf("8\r\n");
@@ -369,9 +358,9 @@ void Search()
         
         #if SIMULATION
             
-            printProfile(&Mouse);
-            //getNextState(&(Mouse.now),&(Mouse.next), Mouse.next.node);
-            printf("次のノードの重み:%x, 侵入方角:%d, x:%d, y:%d, ノードxy:%u,%u\r\n\r\n",Mouse.next.node->weight, Mouse.next.car, Mouse.next.pos.x,Mouse.next.pos.y, Mouse.next.node->pos.x,Mouse.next.node->pos.y);
+            printProfile(Mouse);
+            //getNextState(&(Mouse->now),&(Mouse->next), Mouse->next.node);
+            printf("次のノードの重み:%x, 侵入方角:%d, x:%d, y:%d, ノードxy:%u,%u\r\n\r\n",Mouse->next.node->weight, Mouse->next.car, Mouse->next.pos.x,Mouse->next.pos.y, Mouse->next.node->pos.x,Mouse->next.node->pos.y);
             //break;
             //ここでシミュレーションしたデータの可視化のためのデータを保存
 
@@ -408,12 +397,14 @@ void Search()
 
     #if SIMULATION 
         //出来上がった迷路を出力する
+        //
+        printf("探索に要した歩数 : %u, スタートノードの重み : %u\r\n", count, my_maze->RawNode[0][1].weight);
         printf("得られた迷路\r\n");
-        printAllNode(&(my_maze));
-        printAllWeight(&(my_maze), &(Mouse.now.pos));
+        printAllNode((my_maze));
+        printAllWeight((my_maze), &(Mouse->now.pos));
         //printf("9\r\n");
-        printMatrix16ValueFromNode(&(my_maze)); //自分の迷路を更新していなかった
-        outputDataToFile(&my_maze);
+        printMatrix16ValueFromNode((my_maze)); //自分の迷路を更新していなかった
+        outputDataToFile(my_maze);
         //printf("10\r\n");
     #else 
         //実環境走行 : //最初の61.5mmの加速コマンドを発行
@@ -428,13 +419,62 @@ void Search()
     //break;
     //return true;
 }
+void Fastest_Run(maze_node *maze, profile *mouse, state *route_log)
+{
+    //my_maze
+    //壁情報の入った迷路を取得
+    //評価値マップだけ初期化
+    updateAllNodeWeight(maze,GOAL_X,GOAL_Y,GOAL_SIZE_X,GOAL_SIZE_Y,0x03);
+    //Mouse
+    //プロフィールの初期化
+    initProfile(mouse, maze);
+    //理想は、ゴールまで重み更新なしで、コマンドによるモータ制御のみ
+    //シミュレーションの1stステップとしては、重み更新無しでノード選択しながら、stateの更新だけする
+    
+    //最初の加速コマンド
+    int cnt=0;
+    
+    
+    while(! ((mouse->goal_lesser.x <= mouse->next.pos.x && mouse->next.pos.x <= mouse->goal_larger.x) && (mouse->goal_lesser.y <= mouse->next.pos.y && mouse->next.pos.y <= mouse->goal_larger.y)))
+    {
+        shiftState(mouse);
+        updateAllNodeWeight(maze, mouse->goal_lesser.x, mouse->goal_lesser.y, GOAL_SIZE_X, GOAL_SIZE_Y, 0x03);
+        mouse->now.node = getNodeInfo(maze,mouse->now.pos.x,mouse->now.pos.y, mouse->now.car);
+        //選んだノードと、迷路上のノードの、アドレスが一致していればOK. 
+        char r[]="行";
+        char c[]="列";
+         
+        
+
+        
+        printf("現ノード    重み:%x\r\n            %s x:%u, y:%u\r\n            侵入方角:%d, x:%d, y:%d\r\n",mouse->now.node->weight, (mouse->now.node->rc == 1) ? c:r, mouse->now.node->pos.x, mouse->now.node->pos.y, mouse->now.car, mouse->now.pos.x,mouse->now.pos.y);
+        //updateAllNodeWeight(&my_maze, Mouse->goal_lesser.x, Mouse->goal_lesser.y, GOAL_SIZE_X, GOAL_SIZE_Y, 0x01);
+        mouse->next.node = getNextNode(maze, mouse->now.car, mouse->now.node, 0x03);//これらの引数のどれかがいけない. 迷路、方角、ノードポインタ. 一発目の、ノードの重みがfffなのはなぜ？
+        //char rcnext[2] = (mouse->next.node->rc == 1) ? "列" : "行";
+        printf("次ノード    重み:%x\r\n            %s x:%u, y:%u\r\n            ", mouse->next.node->weight, (mouse->next.node->rc == 1) ? c:r , mouse->next.node->pos.x, mouse->next.node->pos.y);
+        
+        getNextState(&(mouse->now),&(mouse->next),mouse->next.node);
+        printf("侵入方角:%d, x:%d, y:%d\r\n\r\n",mouse->next.car, mouse->next.pos.x,mouse->next.pos.y);
+        //デバッグ用
+        //route_log[cnt].node = mouse->now.node;
+        //printf("あ: %p\r\n", route_log[cnt].node);
+        getRouteFastRun( route_log, &(mouse->now), cnt);
+        cnt++;
+        // if(cnt == 5) break;
+    }
+    printAllWeight(maze, &(mouse->now.pos));
+    outputDataToFile(maze);
+    printf("最短走行終了: かかった歩数: %d, スタートノードの重み: %d\r\n",cnt, maze->RawNode[0][1].weight);
+}
 
 _Bool Simulation()
 {
     //外部から迷路をインポートして走らせる
 
     //MATLABもしくは実機走行により作った迷路テキストをインポート
-    
+#define SEARCH 1
+#define VIRTUALMAP_RUN 0
+
     initMaze(&(test.virtual_maze));
     initWeight(&(test.virtual_maze));
     #if DEBUG_ON
@@ -462,10 +502,31 @@ _Bool Simulation()
         printf("仮想迷路の");
     printAllWeight(&(test.virtual_maze));
     #endif
-    
+
+profile mouse;
+#if SEARCH == 0
     /* ここでアルゴリズムを試し書きする */
     printf("探索関数\r\n");
-    Search();
+    maze_node my_maze;
+    Search(&my_maze, &mouse);
+       // //最短走行
+    state route_log[100]={0}; //要素。メモリが足りてない?
+    printf("最短走行: 確保済みログデータサイズ: %ld\r\n", sizeof(route_log));
+    //これやると、バグる. ログ用の配列の、ノード用のポインタにスタートノードのアドレスを入れただけ. ログ側のポインタ変数はいじっていない➡ //initState(&route_log[0], 6, &(my_maze.RawNode[0][1]));
+
+    Fastest_Run(&my_maze,&mouse, &route_log[0]);
+
+        printRoute(&route_log[0], 100);
+ #elif VIRTUALMAP_RUN == 0
+    // //最短走行
+#define LOG_SIZE 300
+    state route_log[LOG_SIZE]={0}; //要素。メモリが足りてない?
+    printf("最短走行: 確保済みログデータサイズ: %ld\r\n", sizeof(route_log));
+
+    Fastest_Run(&test.virtual_maze,&mouse, &route_log[0]);
+
+        printRoute(&route_log[0], LOG_SIZE);
+#endif
     return true;
     
 }

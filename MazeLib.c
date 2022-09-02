@@ -87,6 +87,42 @@ _Bool judgeColumnNodeGoal(maze_node *maze, uint8_t x, uint8_t y)
         return false;
     }
 }
+
+void getRouteFastRun(state *log_st, state *now_st, int n)
+{
+    // printf("呼び出し: %p, %d\r\n", now_st, now_st->node->rc);
+    // printf("呼び出し: %p, %p\r\n", log_st, log_st[n].node);
+    //最短走行時に通ったノードのxyとrawかcolumnかの情報を配列に格納する
+    log_st[n].node = now_st->node;
+
+    log_st[n].car = now_st->car;
+    log_st[n].pos.x = now_st->pos.x;
+    log_st[n].pos.y = now_st->pos.y;
+
+    log_st[n].wall.north = now_st->wall.north;
+    log_st[n].wall.east = now_st->wall.east;
+    log_st[n].wall.south = now_st->wall.south;
+    log_st[n].wall.west = now_st->wall.west;
+}
+void printRoute(state *route, int n)
+{
+    //ノードをチェック. 
+    for(int k=0; k < n; k++)
+    {
+        if(route[k].node->rc == 0)
+        {
+            printf("行ノード: ");
+        }
+        if(route[k].node->rc == 1)
+        {
+            printf("列ノード: ");
+        }
+        printf("x:%u, y:%u, 重み: %u\r\n", route[k].node->pos.x , route[k].node->pos.y, route[k].node->weight);
+        printf("座標: x:%u, y:%u, 方角: %u\r\n", route[k].pos.x, route[k].pos.y, route[k].car); //方角はわかりやすく表示したい
+        printf("[北 東 南 西] = [%u %u %u %u]\r\n", route[k].wall.north, route[k].wall.east, route[k].wall.south, route[k].wall.west);
+        printf("\r\n");
+    }
+}
 void printAllWeight(maze_node *maze, position *pos)
 {
     //見やすい形に成型して表示する
@@ -103,7 +139,7 @@ void printAllWeight(maze_node *maze, position *pos)
         printf("  +  ");
         for(int x=0; x < NUMBER_OF_SQUARES_X; x++)
         {
-            if(judgeRawNodeGoal(maze, x,y) == true || ((pos->x == x) && (pos->y == y)))
+            if(judgeRawNodeGoal(maze, x,y) == true || ((pos->x == x) && (pos->y == y)))//辿った経路を赤で表示
             {
                 printf(" \x1B[31;1m%3x\x1B[37;m ",maze->RawNode[x][y].weight);
             }
@@ -492,8 +528,8 @@ void initTargetAreaWeight(maze_node *maze, uint8_t x, uint8_t y, uint8_t target_
         }
     }
 }
-#define WEIGHT_NANAME   1
-#define WEIGHT_STRAIGHT 2
+#define WEIGHT_NANAME   5
+#define WEIGHT_STRAIGHT 7
 
     // //初期化は要るのか. 別で呼ぶ
     // initWeight(maze);
@@ -770,27 +806,27 @@ node *getNextNode(maze_node *maze, cardinal car, node *now_node, int mask)
     //printf("マイノードが01のどちらか:%d\r\n",now_node->rc);
     if(now_node->rc == 0)
     {
-        printf("行にいる\r\n");
+        printf("行ノードから");
         //条件がおかしい？printしている全ノードの重みと、アドレスを入れたはずのマイノードの重みが違う
         
         //行にいるとき
         //北側ノード
         if(now_node->pos.y < NUMBER_OF_SQUARES_Y-1)					//範囲チェック
         {
-            printf("%u\r\n",now_node->pos.y);
+            //printf("%u\r\n",now_node->pos.y);
             if( (maze->RawNode[now_node->pos.x][now_node->pos.y+1].existence & mask) == NOWALL)	//壁がなければ(maskの意味はstatic_parametersを参照)
             {
-                printf("%d\r\n", maze->RawNode[now_node->pos.x][now_node->pos.y+1].existence);//壁があることになってた..
+                // printf("%d\r\n", maze->RawNode[now_node->pos.x][now_node->pos.y+1].existence);//壁があることになってた..
                 if(compare_weight > maze->RawNode[now_node->pos.x][now_node->pos.y+1].weight)
                 {
-                    printf("北\r\n");
+                    printf("北へ\r\n");
                     compare_weight = maze->RawNode[now_node->pos.x][now_node->pos.y+1].weight;
                     next_node = &(maze->RawNode[now_node->pos.x][now_node->pos.y+1]);
                     flag = true;
                 }
             }
         }
-        //南側ノード
+        //南へ側ノード
         if(now_node->pos.y > 1)						//範囲チェック
         {
             if( (maze->RawNode[now_node->pos.x][now_node->pos.y-1].existence & mask) == NOWALL)	//壁がなければ
@@ -798,36 +834,36 @@ node *getNextNode(maze_node *maze, cardinal car, node *now_node, int mask)
                 //重みを比較して更新
                 if(compare_weight > maze->RawNode[now_node->pos.x][now_node->pos.y-1].weight)
                 {
-                    printf("南\r\n");
+                    printf("南へ\r\n");
                     compare_weight = maze->RawNode[now_node->pos.x][now_node->pos.y-1].weight;
                     next_node = &(maze->RawNode[now_node->pos.x][now_node->pos.y-1]);
                     flag = true;
                 }
             }
         }
-        //東側に斜めが2方向
+        //東へ側に斜めが2方向
         if(now_node->pos.x < NUMBER_OF_SQUARES_X-1)					//範囲チェック
         {
-            //北東
+            //北東へ
             if( (maze->ColumnNode[now_node->pos.x+1][now_node->pos.y].existence & mask) == NOWALL)		//壁がなければ
             {
                 //重みを比較して更新
                 if(compare_weight > maze->ColumnNode[now_node->pos.x+1][now_node->pos.y].weight)
                 {
-                    printf("北東\r\n");
+                    printf("北東へ\r\n");
                     compare_weight = maze->ColumnNode[now_node->pos.x+1][now_node->pos.y].weight;
                     next_node = &(maze->ColumnNode[now_node->pos.x+1][now_node->pos.y]);
                     flag = true;
                 }
             }
             
-            //南東
+            //南へ東へ
             if( (maze->ColumnNode[now_node->pos.x+1][now_node->pos.y-1].existence & mask) == NOWALL)		//壁がなければ
             {  
                 //重みを比較して更新
                 if(compare_weight > maze->ColumnNode[now_node->pos.x+1][now_node->pos.y-1].weight)
                 {
-                    printf("南東\r\n");
+                    printf("南東へ\r\n");
                     compare_weight = maze->ColumnNode[now_node->pos.x+1][now_node->pos.y-1].weight;
                     next_node = &(maze->ColumnNode[now_node->pos.x+1][now_node->pos.y-1]);
                     flag = true;
@@ -835,29 +871,29 @@ node *getNextNode(maze_node *maze, cardinal car, node *now_node, int mask)
             }
         }
 
-        //西側に斜めが2方向
+        //西へ側に斜めが2方向
         if(now_node->pos.x > 0)						//範囲チェック
         {
-            //北西
+            //北西へ
             if( (maze->ColumnNode[now_node->pos.x][now_node->pos.y].existence & mask) == NOWALL)		//壁がなければ
             {
                 //重みを比較して更新
                
                 if(compare_weight > maze->ColumnNode[now_node->pos.x][now_node->pos.y].weight)
                 {
-                    printf("北西\r\n");
+                    printf("北西へ\r\n");
                     compare_weight = maze->ColumnNode[now_node->pos.x][now_node->pos.y].weight;
                     next_node = &(maze->ColumnNode[now_node->pos.x][now_node->pos.y]);
                     flag = true;
                 }
             }
-            //南西
+            //南へ西へ
             if( (maze->ColumnNode[now_node->pos.x][now_node->pos.y-1].existence & mask) == NOWALL)		//壁がなければ
             {
                 //重みを比較して更新
                 if(compare_weight > maze->ColumnNode[now_node->pos.x][now_node->pos.y-1].weight)
                 {
-                    printf("南西\r\n");
+                    printf("南西へ\r\n");
                     compare_weight = maze->ColumnNode[now_node->pos.x][now_node->pos.y-1].weight;
                     next_node = &(maze->ColumnNode[now_node->pos.x][now_node->pos.y-1]);
                     //このノードあやしい
@@ -871,21 +907,22 @@ node *getNextNode(maze_node *maze, cardinal car, node *now_node, int mask)
     {
         //printf("列にいる\r\n");
         //列にいるとき
-        //東側ノード
+        printf("列ノードから");
+        //東へ側ノード
         if(now_node->pos.x < NUMBER_OF_SQUARES_X-1)					//範囲チェック
         {
             if( (maze->ColumnNode[now_node->pos.x+1][now_node->pos.y].existence & mask) == NOWALL)	//壁がなければ(maskの意味はstatic_parametersを参照)
             {
                 if(compare_weight > maze->ColumnNode[now_node->pos.x+1][now_node->pos.y].weight)
                 {
-                    printf("東\r\n");
+                    printf("東へ\r\n");
                     compare_weight = maze->ColumnNode[now_node->pos.x+1][now_node->pos.y].weight;
                     next_node = &(maze->ColumnNode[now_node->pos.x+1][now_node->pos.y]);
                     flag = true;
                 }
             }
         }
-        //西側ノード
+        //西へ側ノード
         if(now_node->pos.x > 1)						//範囲チェック
         {
             if( (maze->ColumnNode[now_node->pos.x-1][now_node->pos.y].existence & mask) == NOWALL)	//壁がなければ
@@ -893,7 +930,7 @@ node *getNextNode(maze_node *maze, cardinal car, node *now_node, int mask)
                 //重みを比較して更新
                 if(compare_weight > maze->ColumnNode[now_node->pos.x-1][now_node->pos.y].weight)
                 {
-                    printf("西\r\n");
+                    printf("西へ\r\n");
                     compare_weight = maze->ColumnNode[now_node->pos.x-1][now_node->pos.y].weight;
                     next_node = &(maze->ColumnNode[now_node->pos.x-1][now_node->pos.y]);
                     flag = true;
@@ -903,26 +940,26 @@ node *getNextNode(maze_node *maze, cardinal car, node *now_node, int mask)
         //北側に斜めが2方向
         if(now_node->pos.y < NUMBER_OF_SQUARES_Y-1)					//範囲チェック
         {
-            //北東
+            //北東へ
             if( (maze->RawNode[now_node->pos.x][now_node->pos.y+1].existence & mask) == NOWALL)		//壁がなければ
             {
                 //重みを比較して更新
                 if(compare_weight > maze->RawNode[now_node->pos.x][now_node->pos.y+1].weight)
                 {
-                    printf("北東\r\n");
+                    printf("北東へ\r\n");
                     compare_weight = maze->RawNode[now_node->pos.x][now_node->pos.y+1].weight;
                     next_node = &(maze->RawNode[now_node->pos.x][now_node->pos.y+1]);
                     flag = true;
                 }
             }
             
-            //北西
+            //北西へ
             if( (maze->RawNode[now_node->pos.x-1][now_node->pos.y+1].existence & mask) == NOWALL)		//壁がなければ
             {
                 //重みを比較して更新
                 if(compare_weight > maze->RawNode[now_node->pos.x-1][now_node->pos.y+1].weight)
                 {
-                    printf("北西\r\n");
+                    printf("北西へ\r\n");
                     compare_weight = maze->RawNode[now_node->pos.x-1][now_node->pos.y+1].weight;
                     next_node = &(maze->RawNode[now_node->pos.x-1][now_node->pos.y+1]);
                     flag = true;
@@ -930,28 +967,28 @@ node *getNextNode(maze_node *maze, cardinal car, node *now_node, int mask)
             }
         }
 
-        //南側に斜めが2方向
+        //南へ側に斜めが2方向
         if(now_node->pos.y > 0)						//範囲チェック
         {
-            //南東
+            //南へ東へ
             if( (maze->RawNode[now_node->pos.x][now_node->pos.y].existence & mask) == NOWALL)		//壁がなければ
             {
                 //重みを比較して更新
                 if(compare_weight > maze->RawNode[now_node->pos.x][now_node->pos.y].weight)
                 {
-                    printf("南東\r\n");
+                    printf("南東へ\r\n");
                     compare_weight = maze->RawNode[now_node->pos.x][now_node->pos.y].weight;
                     next_node = &(maze->RawNode[now_node->pos.x][now_node->pos.y]);
                     flag = true;
                 }
             }
-            //南西
+            //南へ西へ
             if( (maze->RawNode[now_node->pos.x-1][now_node->pos.y].existence & mask) == NOWALL)		//壁がなければ
             {
                 //重みを比較して更新
                 if(compare_weight > maze->RawNode[now_node->pos.x-1][now_node->pos.y].weight)
                 {
-                    printf("南西\r\n");
+                    printf("南西へ\r\n");
                     compare_weight = maze->RawNode[now_node->pos.x-1][now_node->pos.y].weight;
                     next_node = &(maze->RawNode[now_node->pos.x-1][now_node->pos.y]);
                     flag = true;
@@ -1156,7 +1193,7 @@ state *getNextState(state *now_state, state *next_state, node *next_node)
                 {
                     next_state->car = west;
                     next_state->pos.x = now_state->pos.x - 1;
-                    printf("南向きから南西:%u, %u\r\n",next_state->pos.y, now_state->pos.x);
+                    //printf("南向きから南西:%u, %u\r\n",next_state->pos.y, now_state->pos.x);
                     return next_state;
                 }
                 //左旋回
@@ -1258,7 +1295,7 @@ state *getNextState(state *now_state, state *next_state, node *next_node)
         default:
             break;
     }
-    printf("ネクストエラー\r\n");
+    printf("エラー in function 'getNextState'.\r\n");
     return next_state; //ここまで来てしまったらエラー
 }
 //xyと次の向きを返す
@@ -1346,7 +1383,26 @@ void setWallExistence(wall_existence *existence, wall_state *state)
     existence->south = state[2];
     existence->west = state[3];
 }
-void initProfile(profile *prof)
+void initState(state *log_st, int n, node *nd)
+{
+    for(int i=0; i < n; i++)
+    {
+        log_st[n].node = nd;
+        printf("%p, ",log_st[n].node);
+        //最短走行時に通ったノードのxyとrawかcolumnかの情報を配列に格納する
+        //ノードのアドレスをどこか指定しないといけない
+        // log_st[n].car = north;
+        // log_st[n].pos.x = 0;
+        // log_st[n].pos.y = 0;
+
+        // log_st[n].wall.north = NOWALL;
+        // log_st[n].wall.east = WALL;
+        // log_st[n].wall.south = WALL;
+        // log_st[n].wall.west = WALL;
+    }
+    printf("い\r\n");
+}
+void initProfile(profile *prof, maze_node *maze)
 {
     setGoal(prof, GOAL_X, GOAL_Y);
 
@@ -1372,6 +1428,8 @@ void initProfile(profile *prof)
     setWallExistence(&(prof->now.wall), &w_st[0]);
     setWallExistence(&(prof->next.wall), &next[0]);
 
+    prof->now.node = &(maze->RawNode[0][0]);
+    prof->next.node = &(maze->RawNode[0][1]);
     // prof->now.node->rc = 0;
     // prof->now.node->pos.x = 0;
     // prof->now.node->pos.y = 0;

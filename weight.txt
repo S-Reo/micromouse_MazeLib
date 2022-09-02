@@ -1,33 +1,33 @@
       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff 
- fff        13        11         f         d         b         9         9         9         b         d         f        11        13        15        17       fff 
-       12        10         e         c         a         8         8         8         8         a         c         e        10        12        14        18 
- fff        11         f         d         b         9         7         7         7         9         b         d         f        11        13       fff       fff 
-       10         e         c         a         8         6         6         6         6         8         a         c         e        10        14        1a 
- fff         f         d         b         9         7         5         5         5         7         9         b         d         f       fff       fff       fff 
-        e         c         a         8         6         4         4         4         4         6         8         a         c         e        16        1c 
- fff         d         b         9         7         5         3         3         3         5         7         9         b         d       fff       fff       fff 
-        c         a         8         6         4         2         2         2         2         4         6         8         a         c        14        1e 
- fff         b         9         7         5         3         1         1         1         3         5         7         9         b       fff       fff       fff 
-        c       fff       fff       fff       fff       fff       GGG       GGG       fff       fff       fff         8       fff       fff        12        20 
- fff         d         f        11        13        15       fff       GGG       fff         d         b         9         9         b        11       fff       fff 
-        e         e       fff       fff       fff       fff       GGG       GGG       fff       fff         6       fff       fff       fff        10        22 
- fff       fff         f        11        13        15       fff       GGG       fff         5         5         9         9         b         d       fff       fff 
-       10       fff        10       fff       fff       fff       fff       GGG       fff         4       fff         8         a         c         e        24 
- fff       fff        11        11        13        15        17       fff         1         3         5         7         9         b         d       fff       fff 
-       12        12       fff        12       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff        26 
- fff       fff        13        13        13        15        17       fff        35        33        31        2f       fff        2b       fff        27       fff 
-       14        14        14       fff        14       fff        18        36        34        32       fff        2e        2c        2a        28        28 
- fff       fff        15        15        15        15       fff       fff       fff        33        31       fff        2d       fff        29       fff       fff 
-       16        16        16        16        16        16        1a        38        34        32        30        2e        2c        2a        2a        2a 
- fff       fff        17        17        17        17        17       fff       fff        33        31        2f        2d        2b        2b        2b       fff 
-       18        18        18        18        18        18        1c        36        34        32        30        2e        2c        2c        2c        2c 
- fff       fff        19        19        19        19       fff       fff        35        33        31        2f        2d        2d        2d        2d       fff 
-       1a        1a        1a        1a        1a       fff        1e        36        34        32        30        2e        2e        2e        2e        2e 
- fff       fff        1b        1b        1b        1b        1f       fff       fff        33        31        2f        2f        2f        2f        2f       fff 
-       1c        1c        1c        1c       fff        1c       fff        36        34        32        30        30        30        30        30        30 
- fff       fff        1d        1d       fff        1d        1d       fff        35        33        31        31        31        31        31        31       fff 
-       1e        1e        1e        1e        1e       fff       fff        36        34        32        32        32        32        32        32        32 
- fff       fff        1f        1f        1f        1f        21       fff       fff        33        33        33        33        33        33        33       fff 
-       20        20        20        20        20       fff       fff        36        34        34        34        34        34        34        34        34 
- fff       fff        21        21        21        21        23        37        35        35        35        35        35        35        35        35       fff 
+ fff       156       156       fff       115       fff        d7        d0       fff        82        7b        74       fff        6a        63        63       fff 
+      15b       151       fff       11a       110        dc       fff        cb        87       fff       fff        6f        68       fff        5e        68 
+ fff       fff       fff       11f       fff       fff       fff        c6       fff        8c       fff        71        6a        63        5c       fff       fff 
+      162       14a       124       fff       109        e3        c1       fff        8e       fff       fff        6f       fff        61        57        6f 
+ fff       fff       fff       fff       107       fff       fff        bc       fff        93       fff        74       fff       fff       fff       fff       fff 
+      176       143       12b       10c       102        ea       fff        b7        95       fff        79       fff        72        68        50        76 
+ fff       fff       fff       fff       fff       fff       fff        b2       fff        9a       fff       fff        74        6d       fff       fff       fff 
+      16f       13c       132       102        fb        f1        ad       fff        9c       fff       fff       fff        2f       fff        49        7d 
+ fff       fff       137       fff        fd        f6       fff        a8        a1        a1       fff        2a        2a        31       fff       fff       fff 
+      168       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff        25       fff       fff        42        84 
+ fff       163       163       16a       171       178       fff       GGG       fff        27        20        20        27        47        40       fff       fff 
+      168       15e       fff       fff       fff       fff       GGG       GGG       fff       fff        1b       fff       fff       fff        3b        8b 
+ fff       fff       159       159       160       167       fff       GGG       fff        16        16        1d        2b       fff        39       fff       fff 
+      16f       fff       154       fff       fff       fff       fff       GGG       fff        11       fff       fff        26       fff        34        92 
+ fff       fff       14f       14f       14f       156       15d       fff         5         c        13        1a        21        28        2f       fff       fff 
+      176       14a       fff       14a       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff        99 
+ fff       fff       145       145       141       13a       133       fff        db        d4        cd        c6       fff        b2       fff        9e       fff 
+      17d       fff       140       fff       134       fff       12e        e0        d9        d2       fff        c1        b7        ad        a3        a0 
+ fff       fff       13b       12f       12f       12f       fff       fff       fff       fff       fff       fff        bc       fff        a8       fff       fff 
+      184       136       fff       12a       fff       12a       127        f0        df       fff        cb        c1        b7        ad        aa        a7 
+ fff       fff       fff       fff       fff       fff       125       fff       fff        da       fff        c6       fff        b2       fff       fff       fff 
+      18b       12f       12a       123       120       123       120        e9        df        d5        cb        c1        b7        b4        b1        ae 
+ fff       fff       fff       125       11e       11e       fff       fff        e4       fff        d0       fff        bc       fff       fff        b6       fff 
+      192       128       fff       fff       119       fff       119        e9        df        d5        cb        c1        be        bb        b8        b5 
+ fff       fff       fff       122       11b       114       114       fff       fff        da       fff        c6       fff       fff        c0       fff       fff 
+      199       121       fff       119       fff       10f       fff        e9        df        d5        cb        c8        c5        c2        bf        bc 
+ fff       fff       fff       114       fff       10a       111       fff        e4       fff        d0       fff        cd        ca       fff        c4       fff 
+      1a0       11a       10f       fff       105       fff       fff        e9        df        d5        d2       fff        cc        c9        c6        c3 
+ fff       fff       fff       10a       103       103       10a       fff       fff        da       fff        d7        d1       fff        ce       fff       fff 
+      1a7       113       fff       fff        fe       fff       fff        e9        df       fff       fff        dc       fff        d0       fff       fff 
+ fff       fff       10e       107       100        f9        f2        eb        e4        e4        eb        e1        e1        d5        d5        dc       fff 
       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff       fff 

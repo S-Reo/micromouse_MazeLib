@@ -199,10 +199,13 @@ _Bool getWallNow(state *st, wall_state *wall_st);
 void printAllWeight(maze_node *maze, position *pos);
 _Bool outputDataToFile(maze_node *maze);
 
-void initProfile(profile *prof);
+void initProfile(profile *prof, maze_node *maze);
 void shiftState(profile *prof);
 void printState(state *st);
 void printProfile(profile *prof);
+void initState(state *log_st, int n, node *nd);
+void getRouteFastRun(state *log_st, state *now_st, int n);
+void printRoute(state *route, int n);
 // 探索者の持つ情報群...また別ファイルの方がいいかも. 迷路に関係ない情報も扱うときに
 typedef struct
 {
