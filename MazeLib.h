@@ -43,22 +43,49 @@
 #define __JUDGE_GOAL__(x,y) ( (GOAL_X <= x) && (x < GOAL_X + GOAL_SIZE_X)) && ((GOAL_Y <= y) && (y < GOAL_Y + GOAL_SIZE_Y) )
 
 #define MAX_WEIGHT 4095
+
+//座標の差分をマクロでジャッジ
+#define __RAW_TO_COLUMN_NE__(x_r,y_r, x_c,y_c)   (x_r+1 == x_c && y_r == y_c)   //北東 
+#define __COLUMN_TO_RAW_SW__(x_c,y_c, x_r,y_r)   (x_c-1 == x_r && y_c == y_r)   //南西
+
+#define __RAW_TO_COLUMN_SE__(x_r,y_r, x_c,y_c)   (x_r+1 == x_c && y_r-1 == y_c) //南東
+#define __COLUMN_TO_RAW_NW__(x_c,y_c, x_r,y_r)   (x_c-1 == x_r && y_c+1 == y_r) //北西
+
+#define __RAW_TO_COLUMN_SW__(x_r,y_r, x_c,y_c)   (x_r == x_c && y_r-1 == y_c)   //南西
+#define __COLUMN_TO_RAW_NE__(x_c,y_c, x_r,y_r)   (x_c == x_r && y_c+1 == y_r)   //北東 
+
+#define __RAW_TO_COLUMN_NW__(x_r,y_r, x_c,y_c)   (x_r == x_c && y_r == y_c)     //北西
+#define __COLUMN_TO_RAW_SE__(x_c,y_c, x_r,y_r)   (x_c == x_r && y_c == y_r)     //南東
+
+//直進
+#define __RAW_TO_RAW_NORTH__(x_1,y_1, x_2,y_2)   (x_1 == x_2 && y_1+1 == y_2)
+#define __RAW_TO_RAW_SOUTH__(x_1,y_1, x_2,y_2)   (x_1 == x_2 && y_1-1 == y_2)
+
+#define __COLUMN_TO_COLUMN_EAST__(x_1,y_1, x_2,y_2)   (x_1+1 == x_2 && y_1 == y_2)
+#define __COLUMN_TO_COLUMN_WEST__(x_1,y_1, x_2,y_2)   (x_1-1 == x_2 && y_1 == y_2)
+
 typedef enum{
     NOWALL  = 0,
     WALL    = 1,
-    VIRTUAL = 2,   //壁が無いが、あると仮定したいときに使う
-    UNKNOWN = 3
+    UNKNOWN = 2,
+    VIRTUAL = 3,   //壁が無いが、あると仮定したいときに使う
+    
 }wall_state;
-
+typedef struct
+{
+    uint8_t x;
+    uint8_t y;
+}position;
 typedef struct {
     uint16_t existence  :2;
     uint16_t weight     :12; //64×64対応
-    uint16_t pole       :2; //エッジに対して、柱は2つ. 柱の隣接壁予測に4パターン使う.計算時間とか、やり方がちょっと面倒. オプションにしよう.
-
+    //uint16_t pole       :2; //エッジに対して、柱は2つ. 柱の隣接壁予測に4パターン使う.計算時間とか、やり方がちょっと面倒. オプションにしよう.
     _Bool draw;
-    _Bool flag;
+    _Bool rc; //行か列かを見たい
+
+    position pos;
     //残り2ビットは工夫の余地を残す➡描画ように０１を保存するのと、既知区間かどうかの01保存
-}node;//18ビット
+}node;//16 + 16 = 24ビット
 
 typedef struct {
     node RawNode[NUMBER_OF_SQUARES_X][NUMBER_OF_SQUARES_Y+1];
@@ -68,7 +95,7 @@ typedef struct {
 
 //迷路の初期化
 void initMaze(maze_node *maze);
-
+void initWeight(maze_node *maze);
 //迷路データの更新用の関数
 _Bool setExistanceRawNode(maze_node *maze, uint8_t x, uint8_t y, wall_state et);
 _Bool setExistanceColumnNode(maze_node *maze, uint8_t x, uint8_t y, wall_state et);
@@ -122,11 +149,6 @@ typedef struct{
 
 // 探索者の情報には2種類。MazeLibに関連したデータと、物理的な情報を考慮したデータ。
     //まず前者を作る
-typedef struct
-{
-    uint8_t x;
-    uint8_t y;
-}position;
 
 typedef struct
 {
@@ -134,7 +156,7 @@ typedef struct
     cardinal car;
     //多分アクションも（コマンド？）
     wall_existence wall; //壁の有無
-
+    node *node;
 }state;
 
 typedef struct
@@ -142,6 +164,7 @@ typedef struct
     // 最終的なゴール
     position goal_lesser;
     position goal_larger;
+    uint8_t target_size; //目標エリアのサイズ
 
     state now;  //現在座標、方角
     state next; //
@@ -167,10 +190,13 @@ void setWallExistence(wall_existence *existence, wall_state *state);
 //ノードの更新
 void updateNodeThree(maze_node *maze, state *st, uint8_t x, uint8_t y);
 void updateNodeDraw(maze_node *maze, uint8_t x, uint8_t y);
-
+void updateAllNodeWeight(maze_node *maze, uint8_t x, uint8_t y, uint8_t area_size_x, uint8_t area_size_y, int mask);
+node *getNodeInfo(maze_node *maze, uint8_t x, uint8_t y, cardinal car);
+node *getNextNode(maze_node *maze, cardinal car, node *my_node, int mask);
+state *getNextState(state *now_state, state *next_state, node *next_node);
 _Bool getWallNow(state *st, wall_state *wall_st);
 
-void printAllWeight(maze_node *maze);
+void printAllWeight(maze_node *maze, position *pos);
 _Bool outputDataToFile(maze_node *maze);
 
 void initProfile(profile *prof);
